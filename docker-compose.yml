@@ -1,3 +1,49 @@
 version: '3.8'
+services:
+  elasticsearch:
+    image: elasticsearch:7.16.1
+    volumes:
+      - ./configs/elasticsearch/config.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+      - ./docker_volumes/elasticsearch/data:/usr/share/elasticsearch/data
+    environment:
+      ES_JAVA_OPTS: "-Xmx512m -Xms512m"
+      ELASTIC_USERNAME: ADMIN_NAME
+      ELASTIC_PASSWORD: ADMIN_PASSWORD
+      discovery.type: single-node
+    networks:
+      - archipio-net
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+
+  logstash:
+    image: logstash:7.16.2
+    volumes:
+      - ./configs/logstash/config.yml:/usr/share/logstash/config/logstash.yml:ro
+      - ELK-data:/logstash/pipelines.yml:ELK-data:/logstash/config/pipelines.yml:ro
+      - ELK-data:/logstash/pipelines:ELK-data:/logstash/config/pipelines:ro
+    environment:
+      LS_JAVA_OPTS: "-Xmx512m -Xms512m"
+    ports:
+      - "5044:5044"
+      - "5000:5000"
+      - "9600:9600"
+    networks:
+      - archipio-net
+    depends_on:
+      - elasticsearch
+
+  kibana:
+    image: kibana:7.16.1
+    depends_on:
+      - elasticsearch
+    volumes:
+      - ./configs/kibana/config.yml:/usr/share/kibana/config/kibana.yml:ro
+    networks:
+      - archipio-net
+    ports:
+      - "5601:5601"
+volumes:
+    ELK-data:
 networks:
   archipio-net:
