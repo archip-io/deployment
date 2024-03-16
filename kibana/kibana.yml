@@ -1,0 +1,8 @@
+server.name: archipio-kibana-server
+server.host: 0.0.0.0
+server.publicBaseUrl: "https://kibana.archipio.ru"
+monitoring.ui.container.elasticsearch.enabled: true
+
+elasticsearch.hosts: ["http://archipio-elasticsearch:9200"]
+elasticsearch.username: ${ARCHIPIO_ELASTICSEARCH_ADMIN}
+elasticsearch.password: ${ARCHIPIO_ELASTICSEARCH_PASSWORD}
