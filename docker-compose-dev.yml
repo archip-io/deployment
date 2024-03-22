@@ -1,0 +1,43 @@
+version: '3.8'
+services:
+  postgres:
+    image: "postgres:latest"
+    container_name: archipio-db-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+      POSTGRES_USER: ${ARCHIPIO_DEV_POSTGRES_ADMIN}
+      POSTGRES_PASSWORD: ${ARCHIPIO_DEV_POSTGRES_ADMIN_PASSWORD}
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${ARCHIPIO_DEV_POSTGRES_ADMIN}" ]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    ports:
+      - ${ARCHIPIO_DEV_POSTGRES_PORT}:5432
+    volumes:
+      - archipio-db-dev-data:/var/lib/postgresql/data
+    networks:
+      - archipio-dev-net
+  redis:
+    image: redis:latest
+    container_name: archipio-cache-dev
+    restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: ${ARCHIPIO_DEV_REDIS_ADMIN_PASSWORD}
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    ports:
+      - ${ARCHIPIO_DEV_REDIS_PORT}:6379
+    volumes:
+      - archipio-cache-dev-data:/data
+    networks:
+      - archipio-dev-net
+volumes:
+  archipio-db-dev-data:
+  archipio-cache-dev-data:
+networks:
+  archipio-dev-net:
