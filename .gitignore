@@ -249,4 +249,5 @@ Temporary Items
 
 ### dotenv template
 .env
-
+.env.development
+.env.production
