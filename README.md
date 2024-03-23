@@ -10,11 +10,22 @@
 
 ## Запуск
 
-1. Создайте файл `.env` и определите в нем переменные среды из файла [sample.env](sample.env)
+### Среда разработки
+
+1. Создайте файл `.env.development` и определите в нем переменные среды из файла [sample.env.development](sample.env.development)
 2. Запустите развертывание при помощи команды:
 
     ```bash
-    docker compose up -d
+    docker compose --file docker-compose-dev.yml --env-file .env.development up -d
+   ```
+
+### Продакшн
+
+1. Создайте файл `.env.production` и определите в нем переменные среды из файла [sample.env](sample.env)
+2. Запустите развертывание при помощи команды:
+
+    ```bash
+    docker compose --env-file .env.production up -d
    ```
 
 ## Вклад в проект
