@@ -1,3 +1,21 @@
-version: '3.8'
+version: '3'
 networks:
   archipio-net:
+services:
+  archipio-rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    hostname: rabbitmq
+    restart: always
+    environment:
+      - RABBITMQ_DEFAULT_USER={$ARCHIPIO_RABBITMQ_DEFAULT_USER:-admin}
+      - RABBITMQ_DEFAULT_PASS={$ARCHIPIO_RABBITMQ_DEFAULT_PASSWORD:-1234}
+      - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS={$ARCHIPIO_RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS}
+    volumes:
+      - archipio-rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - archipio-net
+    ports:
+      - 15672:15672
+volumes:
+  archipio-rabbitmq-data:
+
