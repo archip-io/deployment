@@ -1,3 +1,57 @@
-version: '3.8'
+version: '3'
+services:
+  elasticsearch:
+    container_name: archipio-elasticsearch
+    image: elasticsearch:7.16.1
+    volumes:
+      - ./elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+      - archipio-elasticsearch-data:/usr/share/elasticsearch/data
+    environment:
+      ES_JAVA_OPTS: "-Xmx512m -Xms512m"
+      ELASTIC_USERNAME: ${ARCHIPIO_ELASTICSEARCH_ADMIN:-elastic}
+      ELASTIC_PASSWORD: ${ARCHIPIO_ELASTICSEARCH_PASSWORD:-MyPw123}
+      discovery.type: single-node
+    networks:
+      - archipio-net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f -X GET 'archipio-elasticsearch:9200/_cat/health?v' --user ${ARCHIPIO_ELASTICSEARCH_ADMIN:-elastic}:${ARCHIPIO_ELASTICSEARCH_PASSWORD:-MyPw123} | grep -q 'green'"]
+      interval: 1s
+      timeout: 20s
+      retries: 200
+      
+  logstash:
+    container_name: archipio-logstash
+    image: logstash:7.16.2
+    volumes:
+      - ./logstash/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+      - ./logstash/pipelines.yml:/logstash/config/pipelines.yml:ro
+      - ./logstash/pipelines:/logstash/config/pipelines:ro
+    environment:
+      LS_JAVA_OPTS: "-Xmx512m -Xms512m"
+    networks:
+      - archipio-net
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
+  kibana:
+    container_name: archipio-kibana
+    image: kibana:7.16.1
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    volumes:
+      - ./kibana/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
+    networks:
+      - archipio-net
+    ports:
+      - ${ARCHIPIO_KIBANA_PORT:-5601}:5601
+    environment:
+      - ARCHIPIO_ELASTICSEARCH_ADMIN=${ARCHIPIO_ELASTICSEARCH_ADMIN:-elastic}
+      - ARCHIPIO_ELASTICSEARCH_PASSWORD=${ARCHIPIO_ELASTICSEARCH_PASSWORD:-MyPw123}
+
+volumes:
+  archipio-elasticsearch-data:
+
 networks:
   archipio-net:
